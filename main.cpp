@@ -12,21 +12,14 @@ int main() {
         Board b = Board(fen, ui_white, ui_black);
         int end = b.run();
         //cout << i << " " << end << endl;
-        if (i % 2000 == 0) {
+        if (i % 1000 == 0) {
             cout << "total " << i << endl << ((float)i)/((float)(time(0)-used_seed)) << " games/s" << endl << endl;
         }
     }
         //cout << i << endl;
-    /*for (int test = 0; test < 64; test++) {
-        if (b.get_pe()[test]) {
-            //b.generate_piece_moves(test);
-            cout << "Piece " << test << " Type " << b.get_pl()[test].get_color() << b.get_pl()[test].get_type()  << " Length " << b.get_pl()[test].get_real_moves().size();
-            for (int move:b.get_pl()[test].get_real_moves()) {cout << " " << move;}
-            cout << endl;
-        }
-    }
-    cout << endl << b.get_fen() << endl;*/
 
 
     return 0;
 }
+
+

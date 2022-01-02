@@ -25,13 +25,18 @@ int Piece::get_type() const {return type;}
     }
 }*/
 
-tuple<bool, vector<int> &> Piece::pos_in_view(const short int &pos) {
-    for (auto & view_line: view) {
-        if (find(view_line.begin(), view_line.end(), pos) != view_line.end()) {
-            return {true, view_line};
+tuple<bool, vector<int> &> Piece::pos_in_view(const int &piece, const int &pos) {
+    int begin, end;
+    if (pos < piece || type == 0) {begin = 0, end = 4;}
+    else {begin = 4, end = 8;}
+    for (int i = begin; i < end; i++) {
+
+        if (find(view[i].begin(), view[i].end(), pos) != view[i].end()) {
+            return {true, view[i]};
         }
     }
     return {false, view[0]};
+
 }
 const vector<int> & Piece::get_legal_moves() {return legal_moves;}; // get-methods
 const vector<int> & Piece::get_real_moves() {return real_moves;};

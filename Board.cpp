@@ -402,10 +402,10 @@ int Board::update_moves() {
                 if (piece.get_type() == 0 || piece.get_type() == 3 || piece.get_type() == 4) {heavy_piece = true;}
             }
         } if (udc > 0) {
-            bool see_other_king = get<0>(piece.pos_in_view((short)king_positions[!to_play]));
+            bool see_other_king = get<0>(piece.pos_in_view(i,king_positions[!to_play]));
             if (piece.get_color() == to_play && see_other_king) {update_by_king.push_back(i);}
             else if (!updated_positions.empty()) {
-                tuple<bool, vector<int>> see_king = piece.pos_in_view((short)king_pos), see_org_pos= piece.pos_in_view((short)updated_positions[0]), see_new_pos = piece.pos_in_view((short)updated_positions[1]);
+                tuple<bool, vector<int>> see_king = piece.pos_in_view(i,king_pos), see_org_pos= piece.pos_in_view(i,updated_positions[0]), see_new_pos = piece.pos_in_view(i,updated_positions[1]);
                 if (get<0>(see_king) && get<0>(see_org_pos) && get<1>(see_king) == get<1>(see_org_pos)) {update_by_pin.push_back(i);}
                 else if (get<0>(see_king) && get<0>(see_new_pos) && get<1>(see_king) == get<1>(see_new_pos)) {update_by_pin.push_back(i);}
             }
@@ -504,7 +504,7 @@ int Board::update_moves() {
 
         if ((king.get_color() != piece.get_color() || used_king_pos == other_king_pos) && !piece.get_pins().empty() && piece.get_pins().size() < 3) {
 
-            const vector<int> & pin_line = piece.get_pins(), view_line = get<1>(piece.pos_in_view((short)pin_line.at(0)));
+            const vector<int> & pin_line = piece.get_pins(), view_line = get<1>(piece.pos_in_view(piece_position, pin_line.at(0)));
 
             int range_begin = 0, range_end = 0, len = (int) pin_line.size();
             bool is_king;
