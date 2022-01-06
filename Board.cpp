@@ -2,7 +2,7 @@
 
 
 //, const int * (ui_white)(), const int * (ui_black)()
-Board::Board(const string & startpos, Random_ui *white, Random_ui *black) {
+Board::Board(const string & startpos, Interface *white, Interface *black) {
     int count = 0, spaces = -1;
     delete ui_white, ui_black;
     ui_white = white, ui_black = black;

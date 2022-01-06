@@ -8,6 +8,7 @@
 #include <cmath>
 #include <random>
 #include <ctime>
+#include <variant>
 using namespace std;
 
 
