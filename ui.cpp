@@ -33,7 +33,6 @@ tuple<bool, int, int, int> Ascii_ui::move() {
 
         if (raw_move.length() == 2 &&  raw_move != "uu") {raw_move = "p"+raw_move;}
         if (raw_move == "0-0" || raw_move == "O-O") {
-            bool test1 = piece_exists[60-to_play*56], test2 = piece_list[60-to_play*56].pos_in_real_moves(short(62-to_play*56)), test3 = piece_list[60].pos_in_real_moves(62);
             if (piece_exists[60-to_play*56] && piece_list[60-to_play*56].pos_in_real_moves(short(62-to_play*56))) {move = tuple(false, 60-to_play*56, 62-to_play*56, -1); return move;}
         } else if (raw_move  == "0-0-0" || raw_move == "O-O-O") {
             if (piece_exists[60-to_play*56] && piece_list[60-to_play*56].pos_in_real_moves(short (58-to_play*56))) {move = tuple(false, 60-to_play*56, 58-to_play*56, -1); return move;}
@@ -48,8 +47,8 @@ tuple<bool, int, int, int> Ascii_ui::move() {
             int piece = convert_piece_type((raw_move.at(0))); // type of piece to move
             raw_piece = raw_move.at(0);
             raw_move = string(raw_move.begin()+1, raw_move.end());
-            if (isalpha(raw_move.at(raw_move.length()-1))) {
-                promotion = convert_piece_type(convert_piece_type(1,toupper(raw_move.at(raw_move.length()-1))));
+            if (isalpha((char) raw_move.at(raw_move.length()-1))) {
+                promotion = convert_piece_type(toupper(raw_move.at(raw_move.length()-1)));
                 raw_move.pop_back();
             } // handles and removes promotions
             if ((raw_move.length() == 3 || raw_move.length() == 4) && !isalpha(raw_move.at(raw_move.length()-1))) {
@@ -84,7 +83,8 @@ tuple<bool, int, int, int> Ascii_ui::move() {
                         break;
                     }
                 }
-            } else {try_pawn = false; continue;}
+            } else if (!try_pawn) {try_pawn = true; continue;}
+            else {try_pawn = false; continue;}
         }
         if (old_pos == -1 || tar == -1) {try_pawn = true; continue;}
         move = tuple(false, old_pos, tar, promotion);

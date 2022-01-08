@@ -95,12 +95,12 @@ int Board::run() {
     while (true) {
         int game_end = update_moves();
         if (game_end >= 0) {
-            //draw(1);
+            draw(1);
             return game_end; //game over
         }
         while (true) {
             tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom deafault is -1
-            //draw(1);
+            draw(1);
             //cout << move_count << get_fen() << endl;
 
             if (to_play) {
@@ -112,6 +112,7 @@ int Board::run() {
             }
             if (get<0>(move_case)) {
                 if (get<1>(move_case) == 6) {return 6;} // new game requested
+                else if (get<1>(move_case) == 1) {undo();}
                 else {continue;}
             } else {
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].pos_in_real_moves(get<2>(move_case)) && get<3>(move_case) >= -1 && get<3>(move_case) < 5 && get<3>(move_case) != 0) {
@@ -135,9 +136,7 @@ void Board::update(int old, int target, Piece obj , int promotion = -1) {
     }
 }
 void Board::make_move(int old, int target, int promotion) {
-    if (move_count == 266) {
-        int test2 = 0;
-    }
+
     move_count ++;
     mr_count ++;
 
@@ -152,6 +151,67 @@ void Board::make_move(int old, int target, int promotion) {
     Piece & obj = piece_list[old];
     int rook_old = -1, rook_new = -1;
 
+
+    // cases for castles, en-passant, normal capture, normal move
+    Move add;
+    if (obj.get_type() == 5 && abs(target%8-old%8) > 1) {
+        if (target-old == 2) {
+            rook_old = old/8*8+7; rook_new = old/8*8+5;
+        } else if (target-old == -2) {
+            rook_old = old/8*8; rook_new = old/8*8+3;
+        }
+        Piece & rook_obj = piece_list[rook_old];
+        add = {3, old, target, rook_old, rook_new, -1, -1, mr_count,
+                -1, {castles[0],castles[1],castles[2],castles[2]} , obj, rook_obj};
+        /*add.type = 3; add.pos = old; add.tar = target; add.rook_pos = rook_old; add.rook_tar = rook_new;
+        add.obj = obj; add.rook_obj = rook_obj; add.en_passant = -1;
+        add.castles[0] = castles[0]; add.castles[1] = castles[1]; add.castles[2] = castles[2]; add.castles[3] = castles[3];*/
+        update(rook_old, rook_new, rook_obj, -1);
+
+    } else if (obj.get_type() == 0 && target == en_passant) {
+        int tar_en_passant = old/8*8+target%8;
+        Piece & tar_obj = piece_list[tar_en_passant];
+        piece_exists[tar_en_passant] = false;
+        add = {2, old, target, -1, -1, -1, -1, mr_count,
+               en_passant, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, tar_obj};
+        //add.type = 2; add.pos = old; add.tar = target; add.obj = obj; add.tar_obj = tar_obj; add.en_passant = en_passant;
+
+    } else if (piece_exists[target]) {
+        Piece & tar_obj = piece_list[target];
+        add = {1, old, target, -1, -1, -1, -1, mr_count,
+               -1, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, tar_obj};
+        //add.type = 5; add.pos = old; add.tar = target; add.obj = obj; add.tar_obj = tar_obj;
+        if (promotion != -1) {
+            add = {5, old, target, -1, -1, promotion, obj.get_type(), mr_count,
+                   -1, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, tar_obj};
+        }
+        piece_exists[target] = false;
+        mr_count = 0;
+
+    } else {
+        add = {0, old, target, -1, -1, -1, -1, mr_count,
+               en_passant, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, {}};
+        //add.type = 5; add.pos = old; add.tar = target; add.obj = obj;
+        if (promotion != -1) {
+            add = {4, old, target, -1, -1, promotion, obj.get_type(), mr_count,
+                   -1, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, {}};
+            //add.promotion = promotion, add.promotion_old = obj.get_type();
+        }
+
+    }
+    move_list.push_back(add);
+    update(old, target, obj, promotion);
+    Position new_position{};
+    for (int i = 0; i < 64; i++) {
+        new_position.position[i] = (piece_exists[i]? tuple<int, int>(piece_list[i].get_color(), piece_list[i].get_type()): tuple<int, int>(-1,-1));
+        if (i<4) {new_position.castles[i] = castles[i];}
+    }
+    new_position.en_passant = en_passant;
+
+    if (obj.get_type() == 0) {
+        mr_count = 0;
+        //positions.clear();
+    }
     // draw rules and castles updates
     if (obj.get_type() == 5) {
         if (obj.get_color() == 1) {castles[0] = false; castles[1] = false;}
@@ -174,77 +234,59 @@ void Board::make_move(int old, int target, int promotion) {
             default:
                 break;
         }
-        /*if (old == 0 || old == 7 || old == 56 || old == 63) {
-            castles[1-(old%8)/7+old%25] = false;
-            bool test2_5 = false;
-        }*/
-    }
-
-    // cases for castles, en-passant, normal capture, normal move
-    Move add;
-    if (obj.get_type() == 5 && abs(target%8-old%8) > 1) {
-        if (target-old == 2) {
-            rook_old = old/8*8+7; rook_new = old/8*8+5;
-        } else if (target-old == -2) {
-            rook_old = old/8*8; rook_new = old/8*8+3;
-        }
-        Piece & rook_obj = piece_list[rook_old];
-        add = {3, old, target, rook_old, rook_new, -1, -1,
-                false, {castles[0],castles[1],castles[2],castles[2]} , obj, rook_obj};
-        /*add.type = 3; add.pos = old; add.tar = target; add.rook_pos = rook_old; add.rook_tar = rook_new;
-        add.obj = obj; add.rook_obj = rook_obj; add.en_passant = -1;
-        add.castles[0] = castles[0]; add.castles[1] = castles[1]; add.castles[2] = castles[2]; add.castles[3] = castles[3];*/
-        update(rook_old, rook_new, rook_obj, -1);
-
-    } else if (obj.get_type() == 0 && target == en_passant) {
-        int tar_en_passant = old/8*8+target%8;
-        Piece & tar_obj = piece_list[tar_en_passant];
-        piece_exists[tar_en_passant] = false;
-        add = {2, old, target, -1, -1, -1, -1,
-               false, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, tar_obj};
-        //add.type = 2; add.pos = old; add.tar = target; add.obj = obj; add.tar_obj = tar_obj; add.en_passant = en_passant;
-
-    } else if (piece_exists[target]) {
-        Piece & tar_obj = piece_list[target];
-        add = {5, old, target, -1, -1, -1, -1,
-               false, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, tar_obj};
-        //add.type = 5; add.pos = old; add.tar = target; add.obj = obj; add.tar_obj = tar_obj;
-        if (promotion != -1) {
-            add = {5, old, target, -1, -1, promotion, obj.get_type(),
-                   false, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, tar_obj};
-        }
-        piece_exists[target] = false;
-        mr_count = 0;
-
-    } else {
-        add = {5, old, target, -1, -1, -1, -1,
-               false, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, {}};
-        //add.type = 5; add.pos = old; add.tar = target; add.obj = obj;
-        if (promotion != -1) {
-            add = {5, old, target, -1, -1, promotion, obj.get_type(),
-                   false, {castles[0],castles[1],castles[2],castles[2]} , obj, {}, {}};
-            //add.promotion = promotion, add.promotion_old = obj.get_type();
-        }
-
-    }
-    move_list.push_back(add);
-    update(old, target, obj, promotion);
-    Position new_position{};
-    for (int i = 0; i < 64; i++) {
-        new_position.position[i] = (piece_exists[i]? tuple<int, int>(piece_list[i].get_color(), piece_list[i].get_type()): tuple<int, int>(-1,-1));
-        if (i<4) {new_position.castles[i] = castles[i];}
-    }
-    new_position.en_passant = en_passant;
-
-    if (obj.get_type() == 0) {
-        mr_count = 0;
-        positions.clear();
     }
     positions.push_back(new_position);
 
     to_play = 1-to_play;
 }
 
+void Board::undo() {
+    undo_count++;
+    move_count--;
+    Move last_move = move_list.at(move_list.size()-undo_count);
+    mr_count = last_move.mr_count;
+    en_passant = last_move.en_passant;
+
+    int old_pos = last_move.pos, tar_pos = last_move.tar, rook_old_pos = last_move.rook_pos, rook_tar_pos = last_move.rook_tar, promotion_type = last_move.promotion;
+    Piece obj = last_move.obj, tar_obj = last_move.tar_obj, rook_obj = last_move.rook_obj;
+
+    // update king_positions
+    if (obj.get_type() == 5) {king_positions[obj.get_color()] = old_pos;}
+    // restore castles states
+    for (int i = 0; i <4; i++) {
+        castles[i] = last_move.castles[i];
+    }
+    // indices: 0 normal, 1 takes, 2 ep, 3 castle, 4 pro, 5 pro capture
+    switch (last_move.type) {
+        case 1: case 5:
+            piece_list[old_pos] = obj;
+            piece_exists[old_pos] = true;
+            break;
+        case 2:
+            piece_exists[tar_pos] = false;
+            // differs row between 3 and 4, keeps file
+            tar_pos = 32-8*to_play+tar_pos%8;
+            piece_list[old_pos] = obj;
+            piece_exists[old_pos] = true;
+            break;
+        default:
+            break;
+    }
+    switch (last_move.type) {
+        case 1: case 2: case 5:
+            piece_list[tar_pos] = tar_obj;
+            piece_exists[tar_pos] = true;
+            break;
+        case 3: // undo castles
+            update(tar_pos, old_pos, obj);
+            update(rook_tar_pos, rook_old_pos, rook_obj);
+            break;
+        default:
+            update(tar_pos, old_pos, obj);
+    }
+
+    to_play = 1-to_play;
+}
 //legal_moves
 void Board::generate_piece_moves(int position) {
     Piece &piece = piece_list[position];
@@ -577,9 +619,7 @@ int Board::update_moves() {
         }
     } else {all_possible_moves.insert(all_possible_moves.end(), king.get_real_moves().begin(), king.get_real_moves().end());}
 
-    if (move_count == 40) {
-        bool test;
-    }
+    cout << "castles " << castles[0] << " " << castles[1] << " " << castles[2] << " " << castles[3] << endl;
     // gameend
     if (all_possible_moves.empty()) {
         if (check) {return (int) king.get_color() == 0;} // checkmate

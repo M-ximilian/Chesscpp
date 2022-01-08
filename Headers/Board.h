@@ -38,7 +38,7 @@ public:
     int update_moves();
     void make_move(int, int, int = -1);
     void update(int, int, Piece, int);
-    void reset(Piece *old_piece_list, bool  *old_piece_exists, int *old_king_positions, int old_mr_count, int old_undo_count, int old_move_count, int *old_castles, int enpassant, vector<Position> old_positions);
+    void undo();
     void draw(int);
     Piece * get_pl();
     bool * get_pe();

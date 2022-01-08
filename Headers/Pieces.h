@@ -41,8 +41,8 @@ private:
 };
 struct Move {
     int type{}; //normal, takes, ep, castle, pro, pro capture (0-5)
-    int pos{}, tar{}, rook_pos{}, rook_tar{}, promotion{}, promotion_old{};
-    bool en_passant{}, castles[4]{};
+    int pos{}, tar{}, rook_pos{}, rook_tar{}, promotion{}, promotion_old{}, mr_count{}, en_passant{};
+    bool castles[4]{};
     Piece obj, rook_obj , tar_obj;
 };
 struct Position {

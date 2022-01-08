@@ -8,7 +8,7 @@ int main() {
     string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     for (int i = 0; i<100000; i++) {
-        auto *ui_white = new Interface{1, nullptr, new Random_ui(1)}, *ui_black = new Interface{1, nullptr, new Random_ui(0)};
+        auto *ui_white = new Interface{0, new Ascii_ui(1), new Random_ui(1)}, *ui_black = new Interface{0, new Ascii_ui(0), new Random_ui(0)};
         Board b = Board(fen, ui_white, ui_black);
         int end = b.run();
         //cout << i << " " << end << endl;
