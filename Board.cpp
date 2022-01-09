@@ -136,6 +136,9 @@ void Board::update(int old, int target, Piece obj , int promotion = -1) {
         piece_exists[target] = true;
     }
 }
+void Board::make_move(tuple<int,int,int> move) {
+    make_move(get<0>(move), get<1>(move), get<2>(move));
+}
 void Board::make_move(int old, int target, int promotion) {
 
     if (undo_count > 0) {

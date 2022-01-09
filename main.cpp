@@ -3,7 +3,7 @@
 
 int main() {
     int used_seed = time(0);
-    int bot_depth = 5;
+    int bot_depth = 3;
     srandom(used_seed);
     cout << used_seed << endl;
     string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
