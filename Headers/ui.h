@@ -1,5 +1,9 @@
+#ifndef UI
+#define UI
 #include "Pieces.h"
 
+static const int eval_list[6] = {10, 30, 32, 50, 90, 900};
+class Board;
 
 class Ui {
 public:
@@ -29,18 +33,21 @@ public:
 
 class Random_ui : public Ui {
 public:
-    explicit Random_ui(int color) : Ui(color) {}
+    explicit Random_ui(int color) : Ui(color) {};
     tuple<bool, int, int, int> move();
 };
 
 class Bot_ui: public Ui {
+public:
+    explicit Bot_ui(int color, int dep) : Ui(color) {depth = dep;};
+    tuple<bool, int, int, int> move();
+    void set_board(Board *b) {game = b;};
 private:
-    int en_pasant, move_count, king_positions[2];
-    bool castles[4];
-    vector<Position> positions;
-
-    Move last_move;
-    vector<Move> move_list;
+    Board *game{};
+    int depth;
+    tuple<float, int, int, int> min_max(int local_depth, bool gameto_play, double alpha, double beta);
+    static float evaluate(Piece *, const bool *);
+    vector<tuple<int, int, int>> order_moves(int color);
 };
-
+#endif
 

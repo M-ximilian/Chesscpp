@@ -1,3 +1,5 @@
+#ifndef MAIN
+#define MAIN
 #include <iostream>
 #include <algorithm>
 #include <utility>
@@ -10,6 +12,7 @@
 #include <ctime>
 #include <variant>
 using namespace std;
+#endif
 
 
 

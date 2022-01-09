@@ -115,6 +115,7 @@ int Board::run() {
                 else if (get<1>(move_case) == 1) {undo();}
                 else {continue;}
             } else {
+                cout << "move " << get<0>(move_case) << " " << get<1>(move_case) << " " << get<2>(move_case) << " " << get<3>(move_case) << " " << endl;
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].pos_in_real_moves(get<2>(move_case)) && get<3>(move_case) >= -1 && get<3>(move_case) < 5 && get<3>(move_case) != 0) {
                     make_move(get<1>(move_case),get<2>(move_case),get<3>(move_case)); // normal move
                     break;
@@ -136,9 +137,6 @@ void Board::update(int old, int target, Piece obj , int promotion = -1) {
     }
 }
 void Board::make_move(int old, int target, int promotion) {
-
-    move_count ++;
-    mr_count ++;
 
     if (undo_count > 0) {
         for (int i = 0; i< undo_count; i++) {
@@ -235,6 +233,8 @@ void Board::make_move(int old, int target, int promotion) {
                 break;
         }
     }
+    move_count ++;
+    mr_count ++;
     positions.push_back(new_position);
 
     to_play = 1-to_play;
@@ -419,7 +419,7 @@ int Board::update_moves() {
     // get pieces to update
     if (udc > 0) {
         if (undo_count == 1) {last_moves.push_back(move_list.at(move_list.size()-1)); last_moves.push_back(move_list.back());}
-        else if (undo_count > 1) {last_moves.push_back(move_list.at(move_list.size()));last_moves.push_back(move_list.at(move_list.size()-undo_count+1));}
+        else if (undo_count > 1) {last_moves.push_back(move_list.at(move_list.size()-undo_count+1));last_moves.push_back(move_list.at(move_list.size()-undo_count));}
         else {last_moves.push_back(move_list.back());}
 
         for (const Move& last_move:last_moves) {
@@ -619,7 +619,7 @@ int Board::update_moves() {
         }
     } else {all_possible_moves.insert(all_possible_moves.end(), king.get_real_moves().begin(), king.get_real_moves().end());}
 
-    cout << "castles " << castles[0] << " " << castles[1] << " " << castles[2] << " " << castles[3] << endl;
+
     // gameend
     if (all_possible_moves.empty()) {
         if (check) {return (int) king.get_color() == 0;} // checkmate

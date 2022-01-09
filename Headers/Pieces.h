@@ -1,3 +1,5 @@
+#ifndef PIECES
+#define PIECES
 #include "main.h"
 
 class Piece {
@@ -65,3 +67,4 @@ static int convert_piece_type(char piece) {
 static char convert_piece_type(int color, int piece) {
     return (char)((7.0/6)*pow(piece, 5)-15.125*pow(piece, 4)+(815.0/12)*pow(piece, 3)-120.375*pow(piece, 2)+773.0*piece/12+80+(1-color)*32);
 }
+#endif

@@ -1,4 +1,5 @@
 #include "Headers/ui.h"
+#include "Headers/Board.h"
 
 void Ui::set_pieces(Piece *pl, const bool *pe) {
     own_pieces.clear();
@@ -102,8 +103,108 @@ tuple<bool, int, int, int> Random_ui::move() {
     int move = piece_list[piece].get_real_moves().at(random()%piece_list[piece].get_real_moves().size());
     int promotion = -1;
     if (piece_list[piece].get_type() == 0 && ((to_play == 0 && (piece/8) == 1 && (move/8) == 0) || (to_play == 1 && (piece/8) == 6 && (move/8) == 7))){
-        promotion = (int( random()))%4+1;
+        promotion = (int(random()))%4+1;
     }
-    return tuple<bool, int, int, int>(false, piece, move, promotion);
+    return {false, piece, move, promotion};
+}
+int count_undo = 0, count_moves =0;
+tuple<bool, int, int, int> Bot_ui::move() {
+    tuple<float, int, int, int> best_move;
+    best_move = min_max(depth, to_play, -infinity(), infinity());
+    cout << count_moves << endl;
+    cout << game->get_fen();
+    return {false, get<1>(best_move), get<2>(best_move), get<3>(best_move)};
 }
 
+
+tuple<float, int, int, int> Bot_ui::min_max(int local_depth, bool gameto_play, double alpha, double beta) {
+    if (count_moves % 100 == 0) {cout << count_moves << endl;}
+    double min_score = infinity(), max_score = -infinity();
+    tuple<double, int,int, int> best_move;
+    if (local_depth == 0) {return {evaluate(game->get_pl(), game->get_pe()), NULL, NULL, NULL};}
+    // sort all possible moves by estimated (hardcoded) strength
+    vector<tuple<int,int,int>> new_moves = order_moves(game->to_play);
+    //go through all moves
+    for (tuple<int,int,int> move:new_moves) {
+        // move and update
+        game->make_move(get<0>(move), get<1>(move), get<2>(move));
+        int game_end = game->update_moves();
+        // test if game over
+        switch (game_end) {
+            case -1:
+                break;
+            case 0:
+                game->undo();
+                return {(game->to_play ? -infinity()+depth-local_depth:infinity()-depth+local_depth), get<0>(move), get<1>(move), get<2>(move)};
+            case 1:
+                game->undo();
+                return {(game->to_play ? infinity()-depth+local_depth:-infinity()+depth-local_depth), get<0>(move), get<1>(move), get<2>(move)};
+            default:
+                game->undo();
+                return {0, get<0>(move), get<1>(move), get<2>(move)};
+        }
+
+        // prepare player specific stuff for next depth
+        count_moves++;
+        best_move = (game->to_play ? min_max(local_depth-1, false, alpha, min_score): min_max(local_depth-1, true, max_score, beta));
+        game->undo();
+        game->update_moves();
+        count_undo++;
+        double &score = get<0>(best_move);
+        if (game->to_play == 1) {
+            if (score > max_score) {
+                max_score = score;
+                if (local_depth == depth) {
+                    best_move = {score, get<0>(move), get<1>(move), get<2>(move)};
+                }
+                if (max_score >= beta) {break;}
+            } //else if (score > -infinity()) {best_move = {score, get<0>(move), get<1>(move), get<2>(move)};}
+        } else {
+            if (score < min_score) {
+                min_score = score;
+                if (local_depth == depth) {
+                    best_move = {score, get<0>(move), get<1>(move), get<2>(move)};
+                }
+                if (min_score <= alpha) {break;}
+            } //else if (score < infinity()) {best_move = {score, get<0>(move), get<1>(move), get<2>(move)};}
+        }
+    }
+    if (local_depth == 2) {
+        bool test = false;
+    }
+    if (game->to_play) {return {max_score, get<1>(best_move), get<2>(best_move), get<3>(best_move)};}
+    else {return {min_score, get<1>(best_move), get<2>(best_move), get<3>(best_move)};}
+}
+
+float Bot_ui::evaluate(Piece *pl, const bool *pe) {
+    int eval = 0;
+    for (int i = 0; i <64; i++) {
+        if (!(*(pe+i))) {continue;}
+        Piece &piece = *(pl+i);
+        eval += eval_list[piece.get_type()] * (-1+2*piece.get_color());
+    }
+
+    return (float) eval;
+}
+vector<tuple<int, int, int>> Bot_ui::order_moves(int color) {
+    Piece *pl = game->get_pl();
+    bool *pe = game->get_pe();
+    vector<tuple<int, int, int>> ordered_moves;
+    for (int i = 0; i < 64; i++) {
+        if (!*(pe+i)) {continue;}
+        Piece &piece = *(pl+i);
+        if (color != piece.get_color()) {continue;}
+        if (piece.get_type() == 0 && i == 1+5*color) {
+            for (int move:piece.get_real_moves()) {
+                for (int prom = 1; prom < 5; prom++) {
+                    ordered_moves.emplace_back(i, move, prom);
+                }
+            }
+        } else {
+            for (int move:piece.get_real_moves()) {
+                ordered_moves.emplace_back(i, move, -1);
+            }
+        }
+    }
+    return ordered_moves;
+}
