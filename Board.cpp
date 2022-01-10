@@ -565,8 +565,8 @@ int Board::update_moves() {
                 vector<int> new_moves= {};
                 bool move_in, block_behind;
                 for (int move:pinned_piece.get_real_moves()) {
-                    move_in = find(view_line.begin(), view_line.end(), move) != view_line.end();
-                    block_behind = move < max(piece_position, used_king_pos) && move > min(piece_position, used_king_pos);
+                    move_in = find(view_line.begin(), view_line.end(), move) != view_line.end() || move == piece_position;
+                    block_behind = move <= max(piece_position, used_king_pos) && move >= min(piece_position, used_king_pos);
                     if (!is_king && move_in && block_behind || is_king && !move_in) {new_moves.push_back(move);}
                     else {all_to_remove.push_back(move);}
                 }

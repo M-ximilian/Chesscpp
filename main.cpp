@@ -3,7 +3,7 @@
 
 int main() {
     int used_seed = time(0);
-    int bot_depth = 3;
+    int bot_depth = 4;
     srandom(used_seed);
     cout << used_seed << endl;
     string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
@@ -11,7 +11,7 @@ int main() {
     //fen = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
 
     for (int i = 0; i<100000; i++) {
-        auto *ui_white = new Interface{0, new Ascii_ui(1), new Random_ui(1), new Bot_ui(1, bot_depth)},
+        auto *ui_white = new Interface{2, new Ascii_ui(1), new Random_ui(1), new Bot_ui(1, bot_depth)},
              *ui_black = new Interface{2, new Ascii_ui(0), new Random_ui(0), new Bot_ui(0, bot_depth)};
         Board b = Board(fen, ui_white, ui_black);
         if (ui_white->type == 2) {ui_white->bui->set_board(&b);}
