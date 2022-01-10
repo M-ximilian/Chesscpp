@@ -75,23 +75,24 @@ Board::Board(const string & startpos, Interface *white, Interface *black) {
 
 }
 void Board::draw(int player) {
-    cout << endl;
     for (int i = 0; i < 64; i++) {
         int real_i = (player==1? 8*(7-i/8) + i%8: i/8*8 + 7-(i%8));
         string to_print;
-        to_print = (piece_exists[real_i] ? "  " : "# ");
+        to_print = (piece_exists[real_i] ? "  " : "\u25a1 ");
         if (piece_exists[real_i]) {
-            if (i % 8 == 7) { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
-            else { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
+            if (i % 8 == 7) { cout << fancy_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
+            else { cout << fancy_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
         } else {
-            if (i % 8 == 7) { cout << "# " << endl; }
-            else { cout << "# " << ""; }
+            if (i % 8 == 7) { cout << "\u25a1 " << endl; }
+
+            else { cout << "\u25a1 " << ""; }
         }
     }
+    cout << endl;
 }
 
 //run
-int Board::run() {
+int Board::run()  {
     while (true) {
         int game_end = update_moves();
         if (game_end >= 0) {
@@ -115,7 +116,7 @@ int Board::run() {
                 else if (get<1>(move_case) == 1) {undo();}
                 else {continue;}
             } else {
-                cout << "move " << get<0>(move_case) << " " << get<1>(move_case) << " " << get<2>(move_case) << " " << get<3>(move_case) << " " << endl;
+                cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].pos_in_real_moves(get<2>(move_case)) && get<3>(move_case) >= -1 && get<3>(move_case) < 5 && get<3>(move_case) != 0) {
                     make_move(get<1>(move_case),get<2>(move_case),get<3>(move_case)); // normal move
                     break;
@@ -370,7 +371,7 @@ void Board::generate_piece_moves(int position) {
     } else {
         for (int l = 0; l < 3; l++) {
             vector<int>& line = piece_moves[l];
-            if (line.empty()) {break;}
+            if (line.empty()) {continue;}
             int move = line[0];
             if (piece_exists[move] && piece_list[move].get_color() == piece.get_color()) {same_kind = 1;} // set same kind
             else if (piece_exists[move]) {same_kind = 0;}
@@ -563,11 +564,12 @@ int Board::update_moves() {
                 Piece & pinned_piece = piece_list[pin_pos];
                 is_king = pin_pos == king_positions[0] || pin_pos == king_positions[1];
                 vector<int> new_moves= {};
-                bool move_in, block_behind;
+                bool move_in, block_behind, take_attacker;
                 for (int move:pinned_piece.get_real_moves()) {
-                    move_in = find(view_line.begin(), view_line.end(), move) != view_line.end() || move == piece_position;
+                    move_in = find(view_line.begin(), view_line.end(), move) != view_line.end();
+                    take_attacker = move == piece_position;
                     block_behind = move <= max(piece_position, used_king_pos) && move >= min(piece_position, used_king_pos);
-                    if (!is_king && move_in && block_behind || is_king && !move_in) {new_moves.push_back(move);}
+                    if (!is_king && (move_in || take_attacker) && block_behind || is_king && !move_in) {new_moves.push_back(move);}
                     else {all_to_remove.push_back(move);}
                 }
                 pinned_piece.set_real_moves(new_moves);

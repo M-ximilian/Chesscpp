@@ -126,18 +126,20 @@ tuple<bool, int, int, int> Bot_ui::move() {
     tuple<int, int, int> best_move;
     float score;
     count_moves = 0;
-    score = better_min_max(depth, -infinityf(), infinityf());
+    best_move_this_iteration = {-1,-1,-1};
+    score = better_min_max(depth, -10000000, 10000000);
     best_move = best_move_this_iteration;
-    cout << count_moves << endl;
-    cout << game->get_fen()  << endl;
-    cout << get<0>(best_move) << " " << get<1>(best_move) << " " << get<2>(best_move) << " "<< score << endl;
+    //cout << count_moves << endl;
+    //cout << game->get_fen()  << endl;
+    //cout << get<0>(best_move) << " " << get<1>(best_move) << " " << get<2>(best_move) << " "<< score << endl;
+    cout << "eval " << score/10 << endl;
     return {false, get<0>(best_move), get<1>(best_move), get<2>(best_move)};
 }
 
 
 tuple<float, int, int, int> Bot_ui::min_max(int local_depth, double alpha, double beta, tuple<int,int,int> last_move) {
-    if (count_moves % 1000 == 0) {cout << count_moves << endl;}
-    double min_score = infinity(), max_score = -infinity();
+    //if (count_moves % 1000 == 0) {cout << count_moves << endl;}
+    double min_score = (numeric_limits<float>::max()), max_score = (-numeric_limits<float>::max());
     tuple<double, int,int, int> best_move;
     if (local_depth == 0) {return {evaluate(game->get_pl(), game->get_pe()), get<0>(last_move), get<1>(last_move), get<2>(last_move)};}
     // sort all possible moves by estimated (hardcoded) strength
@@ -153,10 +155,10 @@ tuple<float, int, int, int> Bot_ui::min_max(int local_depth, double alpha, doubl
                 break;
             case 0:
                 game->undo();
-                return {(game->to_play ? -infinity()+depth-local_depth:infinity()-depth+local_depth), get<0>(move), get<1>(move), get<2>(move)};
+                return {(game->to_play ? (-numeric_limits<double>::max())+depth-local_depth:(numeric_limits<double>::max())-depth+local_depth), get<0>(move), get<1>(move), get<2>(move)};
             case 1:
                 game->undo();
-                return {(game->to_play ? infinity()-depth+local_depth:-infinity()+depth-local_depth), get<0>(move), get<1>(move), get<2>(move)};
+                return {(game->to_play ? (numeric_limits<double>::max())-depth+local_depth:(-numeric_limits<double>::max())+depth-local_depth), get<0>(move), get<1>(move), get<2>(move)};
             default:
                 game->undo();
                 return {0, get<0>(move), get<1>(move), get<2>(move)};
@@ -202,8 +204,8 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta) {
     if (local_depth == 0) {return evaluate(game->get_pl(), game->get_pe());}
 
     vector<tuple<int, int, int>> moves = order_moves(game->to_play);
-    float max_score = -1000000;
-    float min_score = 1000000;
+    float max_score = -10000000;
+    float min_score = 10000000;
     for (auto move:moves) {
         game->make_move(move);
         int game_end = game->update_moves();
@@ -213,14 +215,17 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta) {
             case 0:
                 game->undo();
                 game->update_moves();
-                return (game->to_play ? -infinityf()+(float) (depth-local_depth):infinityf()-(float) (depth+local_depth));
+                if (local_depth == depth && get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) {best_move_this_iteration = move;}
+                return (game->to_play ? (-100000) +(float) (depth-local_depth+1):(100000)-(float) (depth+local_depth-1));
             case 1:
                 game->undo();
                 game->update_moves();
-                return (game->to_play ? infinityf()-(float) (depth+local_depth):-infinityf()+(float) (depth-local_depth));
+                if (local_depth == depth && get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) {best_move_this_iteration = move;}
+                return (game->to_play ? (100000)-(float) (depth+local_depth-1):(-100000)+(float) (depth-local_depth+1));
             default:
                 game->undo();
                 game->update_moves();
+                if (local_depth == depth && get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) {best_move_this_iteration = moves.at(0);}
                 return 0;
         }
         float eval = better_min_max(local_depth-1, alpha, beta);
