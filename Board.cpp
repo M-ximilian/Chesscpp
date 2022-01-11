@@ -113,7 +113,7 @@ int Board::run()  {
             }
             if (get<0>(move_case)) {
                 if (get<1>(move_case) == 6) {return 6;} // new game requested
-                else if (get<1>(move_case) == 1) {undo();}
+                else if (get<1>(move_case) == 1) {undo();undo();}
                 else {continue;}
             } else {
                 cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
@@ -157,6 +157,8 @@ void Board::make_move(int old, int target, int promotion) {
     // cases for castles, en-passant, normal capture, normal move
     Move add;
     if (obj.get_type() == 5 && abs(target%8-old%8) > 1) {
+        if (target%8-old%8 == 4) {target+=2;}
+        else if (target%8-old%8 == -3) {target-=1;}
         if (target-old == 2) {
             rook_old = old/8*8+7; rook_new = old/8*8+5;
         } else if (target-old == -2) {
@@ -600,7 +602,7 @@ int Board::update_moves() {
                     }
                 }
             }
-            piece.pop_real_moves(to_erase);
+            king.pop_real_moves(to_erase);
             block_king.insert(block_king.end(),piece.get_defend().begin(), piece.get_defend().end());
 
         } else {
@@ -622,6 +624,7 @@ int Board::update_moves() {
             Piece & piece = piece_list[piece_pos];
             if (piece.get_color() == king.get_color()) { all_possible_moves.insert(all_possible_moves.end(), piece.get_real_moves().begin(), piece.get_real_moves().end());}
         }
+        king.pop_real_moves({king_pos+2, king_pos-2});
     } else {all_possible_moves.insert(all_possible_moves.end(), king.get_real_moves().begin(), king.get_real_moves().end());}
 
 
