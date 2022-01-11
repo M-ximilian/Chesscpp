@@ -78,14 +78,14 @@ void Board::draw(int player) {
     for (int i = 0; i < 64; i++) {
         int real_i = (player==1? 8*(7-i/8) + i%8: i/8*8 + 7-(i%8));
         string to_print;
-        to_print = (piece_exists[real_i] ? "  " : "\u25a1 ");
+        to_print = (piece_exists[real_i] ? "  " : "# ");
         if (piece_exists[real_i]) {
-            if (i % 8 == 7) { cout << fancy_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
-            else { cout << fancy_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
+            if (i % 8 == 7) { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
+            else { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
         } else {
-            if (i % 8 == 7) { cout << "\u25a1 " << endl; }
+            if (i % 8 == 7) { cout << "# " << endl; }
 
-            else { cout << "\u25a1 " << ""; }
+            else { cout << "# " << ""; }
         }
     }
     cout << endl;
@@ -117,6 +117,10 @@ int Board::run()  {
                 else {continue;}
             } else {
                 cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
+                if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].get_type() == 5 && get<1>(move_case) == 60-56*to_play) {
+                    if (get<2>(move_case) == 56-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 58-56*to_play, get<3>(move_case)};}
+                    else if (get<2>(move_case) == 63-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 62-56*to_play, get<3>(move_case)};}
+                }
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].pos_in_real_moves(get<2>(move_case)) && get<3>(move_case) >= -1 && get<3>(move_case) < 5 && get<3>(move_case) != 0) {
                     make_move(get<1>(move_case),get<2>(move_case),get<3>(move_case)); // normal move
                     break;
@@ -157,8 +161,6 @@ void Board::make_move(int old, int target, int promotion) {
     // cases for castles, en-passant, normal capture, normal move
     Move add;
     if (obj.get_type() == 5 && abs(target%8-old%8) > 1) {
-        if (target%8-old%8 == 4) {target+=2;}
-        else if (target%8-old%8 == -3) {target-=1;}
         if (target-old == 2) {
             rook_old = old/8*8+7; rook_new = old/8*8+5;
         } else if (target-old == -2) {
