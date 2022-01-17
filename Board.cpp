@@ -100,7 +100,7 @@ int Board::run()  {
             return game_end; //game over
         }
         while (true) {
-            tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom deafault is -1
+            tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom default is -1
             draw(1);
             //cout << move_count << get_fen() << endl;
 
@@ -116,7 +116,7 @@ int Board::run()  {
                 else if (get<1>(move_case) == 1) {undo();undo();}
                 else {continue;}
             } else {
-                cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
+                //cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].get_type() == 5 && get<1>(move_case) == 60-56*to_play) {
                     if (get<2>(move_case) == 56-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 58-56*to_play, get<3>(move_case)};}
                     else if (get<2>(move_case) == 63-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 62-56*to_play, get<3>(move_case)};}
@@ -632,14 +632,20 @@ int Board::update_moves() {
 
     // gameend
     if (all_possible_moves.empty()) {
-        if (check) {return (int) king.get_color() == 0;} // checkmate
+        if (check) {
+            cout << move_count << to_play << endl;
+            if (move_count == 3) {
+                bool test = false;
+            }
+            return (int) !to_play;} // checkmate
         else {return 2;} // draw
     } else if (positions.size() > 5) {
-        int rep = 1;
-        Position compare = positions.at(positions.end()-positions.begin()-1);
-        for (int pos = 0; pos < positions.size()-1; pos++) {
+        int rep = 0;
+        Position compare = positions.at(positions.size()-1-undo_count);
+        for (int pos = 0; pos < positions.size()-undo_count; pos++) {
             if (positions.at(pos).position == compare.position && positions.at(pos).castles == compare.castles && positions.at(pos).en_passant == compare.en_passant) {
                 rep++;
+                cout << rep << " reps" <<endl;
                 if (rep == 3) {break;}
             }
         }
@@ -700,3 +706,4 @@ string Board::get_fen() {
 
     return output;
 }
+

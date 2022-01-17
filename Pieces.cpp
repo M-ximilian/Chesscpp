@@ -26,7 +26,40 @@ int Piece::get_type() const {return type;}
 }*/
 
 tuple<bool, vector<int> &> Piece::pos_in_view(const int &piece, const int &pos) {
-    int begin, end;
+    int search_line = 0, current_line = piece/8, current_row = piece%8, row = pos%8, line = pos/8, begin = 0, end = 0;
+    /*if (type != 0) {
+        if (line < current_line) {
+            if (row < current_row) {
+                search_line = 0;
+            } else if (row > current_row) {
+                search_line = 2;
+            } else {
+                search_line = 1;
+            }
+        }
+        else if (line > current_line) {
+            if (row < current_row) {
+                search_line = 5;
+            } else if (row > current_row) {
+                search_line = 7;
+            } else {
+                search_line = 6;
+            }
+        }
+        else{
+            if (row < current_row) {
+                search_line = 3;
+            } else if (row > current_row) {
+                search_line = 4;
+            }
+        }
+    } else{
+        if (row == current_row) {search_line = 5;}
+        else if (row < current_row) {search_line = 6;}
+        else {search_line = 7;}
+        if (color == 1) {search_line -= 5;}
+    }
+    return {find(view[search_line].begin(), view[search_line].end(), pos) != view[search_line].end(), view[search_line]};*/
     if (pos < piece || type == 0) {begin = 0, end = 4;}
     else {begin = 4, end = 8;}
     for (int i = begin; i < end; i++) {
@@ -36,6 +69,7 @@ tuple<bool, vector<int> &> Piece::pos_in_view(const int &piece, const int &pos) 
         }
     }
     return {false, view[0]};
+
 
 }
 const vector<int> & Piece::get_legal_moves() {return legal_moves;}; // get-methods

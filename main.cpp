@@ -4,11 +4,11 @@
 int main() {
     int used_seed = time(0);
     int bot_depth = 3;
-    srandom(used_seed);
+    srandom(1642350471);
     cout << used_seed << endl;
     string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    //fen = "8/K7/7Q/8/8/8/8/5rk1 w KQkq - 0 1";
-    //fen = "6r1/5PPP/k7/8/8/K7/5ppp/7R w - - 0 1";
+    fen = "k7/6R1/7R/8/8/8/P6K/8 b - - 0 1";
+    fen = "7K/1r6/r7/8/6k1/p7/8/8 b - - 0 1";
     //fen = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
 
     for (int i = 0; i<100000; i++) {
@@ -21,6 +21,9 @@ int main() {
         test->run();
         //int end = b.run();
         //cout << i << " " << end << endl;
+        if (i == 164) {
+            bool test1 = false;
+        }
         if (i % 100 == 0) {
             cout << "total " << i << endl << ((float)i)/((float)(time(0)-used_seed)) << " games/s" << endl << endl;
         }

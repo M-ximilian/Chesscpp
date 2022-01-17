@@ -212,16 +212,16 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta) {
         switch (game_end) {
             case -1:
                 break;
-            case 0:
+            case 0: // weiß ist matt (schwarz gewinnt)
                 game->undo();
                 game->update_moves();
-                if (local_depth == depth && get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) {best_move_this_iteration = move;}
-                return (game->to_play ? (-100000) +(float) (depth-local_depth+1):(100000)-(float) (depth+local_depth-1));
+                if (local_depth == depth && ((get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) || (to_play == 0 && (-100000 +(float) (depth-local_depth+1)) < min_score) ||  (to_play == 1 && (-100000 +(float) (depth-local_depth+1)) > max_score))) {best_move_this_iteration = move;}
+                return (-100000) +(float) (depth-local_depth+1);
             case 1:
                 game->undo();
                 game->update_moves();
-                if (local_depth == depth && get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) {best_move_this_iteration = move;}
-                return (game->to_play ? (100000)-(float) (depth+local_depth-1):(-100000)+(float) (depth-local_depth+1));
+                if (local_depth == depth && ((get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) || (to_play == 0 && (100000 -(float) (depth-local_depth+1)) < min_score) ||  (to_play == 1 && (100000 -(float) (depth-local_depth+1)) > max_score))) {best_move_this_iteration = move;}
+                return (100000)-(float) (depth-local_depth+1);
             default:
                 game->undo();
                 game->update_moves();
