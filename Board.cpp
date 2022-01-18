@@ -96,12 +96,12 @@ int Board::run()  {
     while (true) {
         int game_end = update_moves();
         if (game_end >= 0) {
-            draw(1);
+            //draw(1);
             return game_end; //game over
         }
         while (true) {
             tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom default is -1
-            draw(1);
+            //draw(1);
             //cout << move_count << get_fen() << endl;
 
             if (to_play) {
@@ -116,7 +116,7 @@ int Board::run()  {
                 else if (get<1>(move_case) == 1) {undo();undo();}
                 else {continue;}
             } else {
-                cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
+                //cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].get_type() == 5 && get<1>(move_case) == 60-56*to_play) {
                     if (get<2>(move_case) == 56-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 58-56*to_play, get<3>(move_case)};}
                     else if (get<2>(move_case) == 63-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 62-56*to_play, get<3>(move_case)};}
@@ -420,7 +420,7 @@ void Board::generate_piece_moves(int position) {
 
 //all_moves
 int Board::update_moves() {
-    if (mr_count > 49) {return 4;}
+    if (mr_count > 99) {return 4;}
     if (!move_list.empty()) {en_passant = -1;} // preserve enpassant state from fen
     int udc = (int)move_list.size()-undo_count;
     bool heavy_piece = false, local_en_passant = false, long_possible = false, short_possible = false, check = false, any_moves = false;

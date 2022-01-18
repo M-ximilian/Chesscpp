@@ -204,7 +204,7 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta, bool pre_
     if (local_depth == 0) {return evaluate(game->get_pl(), game->get_pe());}
     vector<tuple<int, int, int>> moves;
 
-    if (!pre_sort) {
+    if (false) {
         vector<tuple<int, int, int>> storage = best_moves_this_iteration;
         pre_scores.clear();
         best_moves_this_iteration.clear();
@@ -267,8 +267,8 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta, bool pre_
             if (eval < min_score) {
                 min_score = eval;
                 if (local_depth == depth && !pre_sort) {best_moves_this_iteration = {move};}
-                else if (eval == min_score && local_depth == depth && !pre_sort) {best_moves_this_iteration.push_back(move);}
             }
+            else if (eval == min_score && local_depth == depth && !pre_sort) {best_moves_this_iteration.push_back(move);}
             beta = min(beta, eval);
             if (beta <= alpha) {break;}
         }
