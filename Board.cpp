@@ -78,14 +78,14 @@ void Board::draw(int player) {
     for (int i = 0; i < 64; i++) {
         int real_i = (player==1? 8*(7-i/8) + i%8: i/8*8 + 7-(i%8));
         string to_print;
-        to_print = (piece_exists[real_i] ? "  " : "# ");
+        to_print = (piece_exists[real_i] ? "  " : "\u25a1 ");
         if (piece_exists[real_i]) {
             if (i % 8 == 7) { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
             else { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
         } else {
-            if (i % 8 == 7) { cout << "# " << endl; }
+            if (i % 8 == 7) { cout << "\u25a1 " << endl; }
 
-            else { cout << "# " << ""; }
+            else { cout << "\u25a1 " << ""; }
         }
     }
     cout << endl;
@@ -207,17 +207,25 @@ void Board::make_move(int old, int target, int promotion) {
     }
     move_list.push_back(add);
     update(old, target, obj, promotion);
-    Position new_position{};
-    for (int i = 0; i < 64; i++) {
+    vector<int> new_position;
+    for (int pos = 0; pos < 64; pos++) {
+        new_position.push_back(piece_exists[pos]?piece_list[pos].get_color()*6+piece_list[pos].get_type()+1:0);
+    }
+    for (bool castle : castles) {
+        new_position.push_back(castle);
+    }
+    positions.push_back({new_position, en_passant});
+    /*for (int i = 0; i < 64; i++) {
         new_position.position[i] = (piece_exists[i]? tuple<int, int>(piece_list[i].get_color(), piece_list[i].get_type()): tuple<int, int>(-1,-1));
         if (i<4) {new_position.castles[i] = castles[i];}
     }
+
     new_position.en_passant = en_passant;
 
     if (obj.get_type() == 0) {
         mr_count = 0;
         //positions.clear();
-    }
+    }*/
     // draw rules and castles updates
     if (obj.get_type() == 5) {
         if (obj.get_color() == 1) {castles[0] = false; castles[1] = false;}
@@ -243,7 +251,7 @@ void Board::make_move(int old, int target, int promotion) {
     }
     move_count ++;
     mr_count ++;
-    positions.push_back(new_position);
+    //positions.push_back(new_position);
 
     to_play = 1-to_play;
 }
@@ -415,9 +423,9 @@ int Board::update_moves() {
     if (mr_count > 49) {return 4;}
     if (!move_list.empty()) {en_passant = -1;} // preserve enpassant state from fen
     int udc = (int)move_list.size()-undo_count;
-    bool heavy_piece = false, local_en_passant = false, long_possible = false, short_possible = false, check = false;
+    bool heavy_piece = false, local_en_passant = false, long_possible = false, short_possible = false, check = false, any_moves = false;
     vector<Move> last_moves = {};
-    vector<int> updated_positions, updated_pieces, update_by_pin, update_by_king, all_possible_moves;
+    vector<int> updated_positions, updated_pieces, update_by_pin, update_by_king;
     vector <tuple<int, int>> all_on_board;
 
     Piece & king = piece_list[king_positions[to_play]], other_king = piece_list[king_positions[abs(to_play-1)]];
@@ -578,12 +586,7 @@ int Board::update_moves() {
                 }
                 pinned_piece.set_real_moves(new_moves);
             }
-            for (int move:all_possible_moves) {
-                if (find(all_possible_moves.begin(), all_possible_moves.end(), move) == all_possible_moves.end()) {
-                    new_all_moves.push_back(move);
-                }
-            }
-            all_possible_moves = new_all_moves; new_all_moves.clear();
+
         } if (king.get_color() != piece.get_color()) {
             bool do_next;
             vector<int> to_erase;
@@ -607,10 +610,6 @@ int Board::update_moves() {
             king.pop_real_moves(to_erase);
             block_king.insert(block_king.end(),piece.get_defend().begin(), piece.get_defend().end());
 
-        } else {
-            if (piece_position != king_pos) {
-                all_possible_moves.insert(all_possible_moves.end(), piece.get_real_moves().begin(), piece.get_real_moves().end());
-            }
         }
 
     }
@@ -620,37 +619,29 @@ int Board::update_moves() {
     }
     king.set_real_moves(new_real);
     if (check) {
-        all_possible_moves.clear();
-        for (int piece_pos = 0; piece_pos < 64; piece_pos++) {
-            if (!piece_exists[piece_pos]) {continue;}
-            Piece & piece = piece_list[piece_pos];
-            if (piece.get_color() == king.get_color()) { all_possible_moves.insert(all_possible_moves.end(), piece.get_real_moves().begin(), piece.get_real_moves().end());}
-        }
         king.pop_real_moves({king_pos+2, king_pos-2});
-    } else {all_possible_moves.insert(all_possible_moves.end(), king.get_real_moves().begin(), king.get_real_moves().end());}
-
+    }
+    for (int pos = 0; pos < 64; pos++) {
+        if (!piece_exists[pos]) {continue;}
+        if (!piece_list[pos].get_real_moves().empty()) {any_moves = true;break;}
+    }
 
     // gameend
-    if (all_possible_moves.empty()) {
+    if (!any_moves) {
+        cout << "no moves" << check << to_play << endl;
         if (check) {
-            cout << move_count << to_play << endl;
-            if (move_count == 3) {
-                bool test = false;
-            }
             return (int) !to_play;} // checkmate
         else {return 2;} // draw
     } else if (positions.size() > 5) {
-        int rep = 0;
+        int rep = 1;
         Position compare = positions.at(positions.size()-1-undo_count);
-        for (int pos = 0; pos < positions.size()-undo_count; pos++) {
-            if (positions.at(pos).position == compare.position && positions.at(pos).castles == compare.castles && positions.at(pos).en_passant == compare.en_passant) {
+        for (int pos = 0; pos < positions.size()-undo_count-1; pos++) {
+            if (positions.at(pos).position == compare.position && positions.at(pos).en_passant == compare.en_passant) {
                 rep++;
-                cout << rep << " reps" <<endl;
-                if (rep == 3) {break;}
+                if (rep == 3) {return 3;}
             }
         }
-        if (rep == 3) {return 3;} // repetition
-        else {return -1;}
+        return -1;
     } else {return -1;} // standard return
 }
 
