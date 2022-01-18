@@ -1,11 +1,11 @@
 #include "Headers/ui.h"
 #include "Headers/Board.h"
 
-vector<tuple<int, int, int>> sort_moves(vector<tuple<int, int, int>>& moves, vector<int>& scores) {
+vector<tuple<int, int, int>> sort_moves(vector<tuple<int, int, int>>& moves, vector<float>& scores, bool multiply = false) {
     for (int i = 0; i < moves.size()-1; i ++) {
         for (int j = i+1; j > 0; j--) {
             int swap = j-1;
-            if (scores.at(swap) < scores.at(j)) {
+            if (float (1-2*multiply) * scores.at(swap) < float (1-2*multiply) * scores.at(j)) {
                 iter_swap(moves.begin()+j, moves.begin()+swap);
                 iter_swap(scores.begin()+j, scores.begin()+swap);
 
@@ -126,9 +126,9 @@ tuple<bool, int, int, int> Bot_ui::move() {
     tuple<int, int, int> best_move;
     float score;
     count_moves = 0;
-    best_move_this_iteration = {-1,-1,-1};
+    best_moves_this_iteration.clear();
     score = better_min_max(depth, -10000000, 10000000);
-    best_move = best_move_this_iteration;
+    best_move = best_moves_this_iteration.size()==1?best_moves_this_iteration.at(0):best_moves_this_iteration[rand()%(best_moves_this_iteration.size()-1)];
     //cout << count_moves << endl;
     //cout << game->get_fen()  << endl;
     //cout << get<0>(best_move) << " " << get<1>(best_move) << " " << get<2>(best_move) << " "<< score << endl;
@@ -200,10 +200,19 @@ tuple<float, int, int, int> Bot_ui::min_max(int local_depth, double alpha, doubl
     else {return {min_score, get<1>(best_move), get<2>(best_move), get<3>(best_move)};}
 }
 
-float Bot_ui::better_min_max(int local_depth, float alpha, float beta) {
+float Bot_ui::better_min_max(int local_depth, float alpha, float beta, bool pre_sort, int end_depth) {
     if (local_depth == 0) {return evaluate(game->get_pl(), game->get_pe());}
+    vector<tuple<int, int, int>> moves;
 
-    vector<tuple<int, int, int>> moves = order_moves(game->to_play);
+    if (!pre_sort) {
+        vector<tuple<int, int, int>> storage = best_moves_this_iteration;
+        pre_scores.clear();
+        best_moves_this_iteration.clear();
+        moves = better_order_moves(game->to_play);
+        best_moves_this_iteration = storage;
+    }
+    else {moves = order_moves(game->to_play);}
+
     float max_score = -10000000;
     float min_score = 10000000;
     for (auto move:moves) {
@@ -215,20 +224,33 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta) {
             case 0: // weiß ist matt (schwarz gewinnt)
                 game->undo();
                 game->update_moves();
-                if (local_depth == depth && ((get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) || (to_play == 0 && (-100000 +(float) (depth-local_depth+1)) < min_score) ||  (to_play == 1 && (-100000 +(float) (depth-local_depth+1)) > max_score))) {best_move_this_iteration = move;}
-                return (-100000) +(float) (depth-local_depth+1);
+                if (pre_sort && local_depth == depth == end_depth) {best_moves_this_iteration.push_back(move); pre_scores.push_back(-100000+(depth-local_depth+1));}
+                else {
+                    if (local_depth == depth && (best_moves_this_iteration.empty() || (to_play == 0 && (-100000 +(float) (depth-local_depth+1)) < min_score) ||  (to_play == 1 && (-100000 +(float) (depth-local_depth+1)) > max_score))) {best_moves_this_iteration = {move};}
+                    else if (local_depth == depth && ((to_play == 0 && (-100000 +(float) (depth-local_depth+1)) == min_score) || (to_play == 1 && (-100000 +(float) (depth-local_depth+1)) == max_score))) {best_moves_this_iteration.push_back(move);}
+                }
+                    return (-100000) +(float) (depth-local_depth+1);
             case 1:
                 game->undo();
                 game->update_moves();
-                if (local_depth == depth && ((get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) || (to_play == 0 && (100000 -(float) (depth-local_depth+1)) < min_score) ||  (to_play == 1 && (100000 -(float) (depth-local_depth+1)) > max_score))) {best_move_this_iteration = move;}
+                if (pre_sort && local_depth == depth == end_depth) {best_moves_this_iteration.push_back(move); pre_scores.push_back(100000-(depth-local_depth+1));}
+                else {
+                    if (local_depth == depth && (best_moves_this_iteration.empty() || (to_play == 0 && (100000 - (float) (depth - local_depth + 1)) < min_score) || (to_play == 1 && (100000 - (float) (depth - local_depth + 1)) > max_score))) {best_moves_this_iteration = {move};}
+                    else if (local_depth == depth && ((to_play == 0 && (100000 - (float) (depth - local_depth + 1)) == min_score) || (to_play == 1 && (100000 - (float) (depth - local_depth + 1)) == max_score))) {best_moves_this_iteration.push_back(move);}
+                }
                 return (100000)-(float) (depth-local_depth+1);
             default:
                 game->undo();
                 game->update_moves();
-                if (local_depth == depth && get<0>(best_move_this_iteration) == -1 && get<1>(best_move_this_iteration) == -1) {best_move_this_iteration = moves.at(0);}
+                if (pre_sort && local_depth == depth == end_depth) {best_moves_this_iteration.push_back(move); pre_scores.push_back(0);}
+                else {
+                    if (local_depth == depth && (best_moves_this_iteration.empty() ||(to_play == 0 && 0 < min_score) || (to_play == 1 && 0 > max_score))) {best_moves_this_iteration = {move};}
+                    else if (local_depth == depth && ((to_play == 0 && 0 == min_score) || (to_play == 1 && 0 == max_score))) {best_moves_this_iteration.push_back(move);}
+                    }
                 return 0;
         }
         float eval = better_min_max(local_depth-1, alpha, beta);
+        if (pre_sort && local_depth == end_depth) {best_moves_this_iteration.push_back(move); pre_scores.push_back(eval);}
 
         game->undo();
         game->update_moves();
@@ -236,14 +258,16 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta) {
         if (game->to_play) {
             if (eval > max_score) {
                 max_score = eval;
-                if (local_depth == depth) {best_move_this_iteration = move;}
+                if (local_depth == depth && !pre_sort) {best_moves_this_iteration = {move};}
             }
+            else if (eval == max_score && local_depth == depth && !pre_sort) {best_moves_this_iteration.push_back(move);}
             alpha = max(alpha, eval);
             if (beta <= alpha) {break;}
         } else {
             if (eval < min_score) {
                 min_score = eval;
-                if (local_depth == depth) {best_move_this_iteration = move;}
+                if (local_depth == depth && !pre_sort) {best_moves_this_iteration = {move};}
+                else if (eval == min_score && local_depth == depth && !pre_sort) {best_moves_this_iteration.push_back(move);}
             }
             beta = min(beta, eval);
             if (beta <= alpha) {break;}
@@ -268,7 +292,7 @@ vector<tuple<int, int, int>> Bot_ui::order_moves(int color) {
     Piece *pl = game->get_pl();
     bool *pe = game->get_pe();
     vector<tuple<int, int, int>> ordered_moves;
-    vector<int> scores;
+    vector<float> scores;
     for (int i = 0; i < 64; i++) {
         if (!*(pe+i)) {continue;}
         Piece &piece = *(pl+i);
@@ -285,11 +309,25 @@ vector<tuple<int, int, int>> Bot_ui::order_moves(int color) {
             for (int move:piece.get_real_moves()) {
                 ordered_moves.emplace_back(i, move, -1);
                 if (*(pe+move)) {scores.push_back(eval_list[piece.get_type()]- eval_list[(pl+move)->get_type()]);}
+                else if (color == 1 &&
+                         (move/8+1 < 8 && move%8-1 > -1 && *(pe+move+7) && (pl+move+7)->get_color() != color && (pl+move+7)->get_type() == 0 ||
+                         move/8+1 < 8 && move%8+1 < 8 && *(pe+move+9) && (pl+move+9)->get_color() != color && (pl+move+9)->get_type() == 0)) {
+                    scores.push_back(-eval_list[((pl+move)->get_type())]-eval_list[0]);
+                }
+                else if (color == 0 &&
+                         (move/8-1 >-1 && move%8-1 > -1 && *(pe+move-9) && (pl+move-9)->get_color() != color && (pl+move-9)->get_type() == 0 ||
+                          move/8-1 >-1 && move%8+1 < 8 && *(pe+move-7) && (pl+move-7)->get_color() != color && (pl+move-7)->get_type() == 0)) {
+                    scores.push_back(-eval_list[((pl+move)->get_type())]-eval_list[0]);
+                }
                 else {scores.push_back(0);}
             }
         }
     }
     return sort_moves(ordered_moves, scores);
+}
+vector<tuple<int, int, int>> Bot_ui::better_order_moves(int color) {
+    better_min_max((depth>3?depth-3:1), -10000000, 10000000, true, (depth>3?depth-3:1));
+    return sort_moves(best_moves_this_iteration, pre_scores, !color);
 }
 
 

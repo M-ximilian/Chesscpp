@@ -116,7 +116,7 @@ int Board::run()  {
                 else if (get<1>(move_case) == 1) {undo();undo();}
                 else {continue;}
             } else {
-                //cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
+                cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
                 if (piece_exists[get<1>(move_case)] && piece_list[get<1>(move_case)].get_color() == to_play && piece_list[get<1>(move_case)].get_type() == 5 && get<1>(move_case) == 60-56*to_play) {
                     if (get<2>(move_case) == 56-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 58-56*to_play, get<3>(move_case)};}
                     else if (get<2>(move_case) == 63-56*to_play) {move_case = {get<0>(move_case),get<1>(move_case), 62-56*to_play, get<3>(move_case)};}
@@ -622,13 +622,12 @@ int Board::update_moves() {
         king.pop_real_moves({king_pos+2, king_pos-2});
     }
     for (int pos = 0; pos < 64; pos++) {
-        if (!piece_exists[pos]) {continue;}
+        if (!piece_exists[pos] || piece_list[pos].get_color() != to_play) {continue;}
         if (!piece_list[pos].get_real_moves().empty()) {any_moves = true;break;}
     }
 
     // gameend
     if (!any_moves) {
-        cout << "no moves" << check << to_play << endl;
         if (check) {
             return (int) !to_play;} // checkmate
         else {return 2;} // draw

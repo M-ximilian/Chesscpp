@@ -2,19 +2,18 @@
 #include <ctime>
 
 int main() {
-    cout << numeric_limits<long unsigned int>::max() << " " << numeric_limits<long double>::max() << endl;
-    cout << 0x109AB5 << endl;
     int used_seed = time(0);
     int bot_depth = 4;
-    srandom(1642350471);
+    srandom(used_seed);
+    srand(used_seed);
     cout << used_seed << endl;
     string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-    //fen = "k7/6R1/7R/8/8/8/P6K/8 b - - 0 1";
+    //fen = "rn3rk1/ppp1qp1p/3p4/6p1/2P1n3/P1B1PQ2/1PP2PPP/R4RK1 w - - 1 16";
     //fen = "7K/1r6/r7/8/6k1/p7/8/8 b - - 0 1";
     //fen = "r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1";
 
     for (int i = 0; i<100000; i++) {
-        auto *ui_white = new Interface{2, new Ascii_ui(1), new Random_ui(1), new Bot_ui(1, bot_depth)},
+        auto *ui_white = new Interface{0, new Ascii_ui(1), new Random_ui(1), new Bot_ui(1, bot_depth)},
              *ui_black = new Interface{0, new Ascii_ui(0), new Random_ui(0), new Bot_ui(0, bot_depth)};
         Board b = Board(fen, ui_white, ui_black);
         if (ui_white->type == 2) {ui_white->bui->set_board(&b);}
