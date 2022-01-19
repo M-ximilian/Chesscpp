@@ -96,7 +96,7 @@ private:
     int depth;
     vector<tuple<int, int, int>> best_moves_this_iteration;
     tuple<float, int, int, int> min_max(int local_depth, double alpha, double beta, tuple<int,int, int> last_move);
-    static float evaluate(Piece *, const bool *);
+    float evaluate(Piece *, const bool *);
     vector<tuple<int, int, int>> order_moves(int color);
     float better_min_max(int local_depth, float alpha, float beta, bool pre_sort = false, int end_depth = 0);
     vector<float> pre_scores;

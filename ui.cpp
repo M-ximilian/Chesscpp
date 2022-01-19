@@ -1,5 +1,9 @@
 #include "Headers/ui.h"
 #include "Headers/Board.h"
+bool postion_map = true;
+bool space_calculation = true;
+bool connected_pawns = true;
+
 
 vector<tuple<int, int, int>> sort_moves(vector<tuple<int, int, int>>& moves, vector<float>& scores, bool multiply = false) {
     for (int i = 0; i < moves.size()-1; i ++) {
@@ -110,14 +114,14 @@ tuple<bool, int, int, int> Ascii_ui::move() {
 tuple<bool, int, int, int> Random_ui::move() {
     int piece;
     while (true) {
-        piece = own_pieces.at(random()%own_pieces.size());
+        piece = own_pieces.at(rand()%own_pieces.size());
         if (!piece_list[piece].get_real_moves().empty()) {break;}
     }
 
-    int move = piece_list[piece].get_real_moves().at(random()%piece_list[piece].get_real_moves().size());
+    int move = piece_list[piece].get_real_moves().at(rand()%piece_list[piece].get_real_moves().size());
     int promotion = -1;
     if (piece_list[piece].get_type() == 0 && ((to_play == 0 && (piece/8) == 1 && (move/8) == 0) || (to_play == 1 && (piece/8) == 6 && (move/8) == 7))){
-        promotion = (int(random()))%4+1;
+        promotion = (int(rand()))%4+1;
     }
     return {false, piece, move, promotion};
 }
@@ -280,12 +284,28 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta, bool pre_
 
 float Bot_ui::evaluate(Piece *pl, const bool *pe) {
     float eval = 0;
+    cout << "eval ";
     for (int i = 0; i <64; i++) {
         if (!(*(pe+i))) {continue;}
         Piece &piece = *(pl+i);
         eval += eval_list[piece.get_type()] * (float) (-1+2*piece.get_color()) + eval_positions[piece.get_color()*6+piece.get_type()][i];
+        if (space_calculation && to_play == 0) {
+            eval += (float) (piece.get_real_moves().size()) * (float)(piece.get_color() == 1?1:-1) * 0.1;
+        }
+        if (connected_pawns && to_play == 0 &&  piece.get_type() == 0) {
+            for (int column:{-1,1}) {
+                for (int row:{-1,0,1}) {
+                    if (i%8+column>-1 && i%8+column<8 && i/8+row>-1 && i/8+row<8) {
+                        if ((pl+((i/8+row)*8+i%8+column))->get_type() == 0 && (pl+((i/8+row)*8+i%8+column))->get_color() == piece.get_color()) {
+                            eval += (float) 0.1*(float)(piece.get_color() == 1?1:-1);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
-
+    cout << endl;
     return eval;
 }
 vector<tuple<int, int, int>> Bot_ui::order_moves(int color) {
