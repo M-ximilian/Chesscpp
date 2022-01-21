@@ -14,7 +14,7 @@ int main() {
 
     for (int i = 0; i<100000; i++) {
         auto *ui_white = new Interface{0, new Ascii_ui(1), new Random_ui(1), new Bot_ui(1, bot_depth)},
-             *ui_black = new Interface{0, new Ascii_ui(0), new Random_ui(0), new Bot_ui(0, bot_depth)};
+             *ui_black = new Interface{2, new Ascii_ui(0), new Random_ui(0), new Bot_ui(0, bot_depth)};
         Board b = Board(fen, ui_white, ui_black);
         if (ui_white->type == 2) {ui_white->bui->set_board(&b);}
         if (ui_black->type == 2) {ui_black->bui->set_board(&b);}

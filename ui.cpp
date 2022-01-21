@@ -3,6 +3,8 @@
 bool postion_map = true;
 bool space_calculation = true;
 bool connected_pawns = true;
+bool open_lines = true;
+bool double_pawns = true;
 
 
 vector<tuple<int, int, int>> sort_moves(vector<tuple<int, int, int>>& moves, vector<float>& scores, bool multiply = false) {
@@ -284,28 +286,77 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta, bool pre_
 
 float Bot_ui::evaluate(Piece *pl, const bool *pe) {
     float eval = 0;
-    cout << "eval ";
+    int space_map[64];
+    int pawn_map[2][8];
+    vector<int> rook_pos[2];
+    for (int &i:space_map) {i = 0;}
+    for (int &i:pawn_map[0]) {i = 0;}
+    for (int &i:pawn_map[1]) {i = 0;}
+
     for (int i = 0; i <64; i++) {
         if (!(*(pe+i))) {continue;}
         Piece &piece = *(pl+i);
         eval += eval_list[piece.get_type()] * (float) (-1+2*piece.get_color()) + eval_positions[piece.get_color()*6+piece.get_type()][i];
         if (space_calculation && to_play == 0) {
-            eval += (float) (piece.get_real_moves().size()) * (float)(piece.get_color() == 1?1:-1) * 0.1;
+            int multiplier = piece.get_color()==1?1:-1;
+            for (int move:piece.get_defend()) {
+                space_map[move]+=multiplier;
+            }
         }
         if (connected_pawns && to_play == 0 &&  piece.get_type() == 0) {
             for (int column:{-1,1}) {
                 for (int row:{-1,0,1}) {
                     if (i%8+column>-1 && i%8+column<8 && i/8+row>-1 && i/8+row<8) {
                         if ((pl+((i/8+row)*8+i%8+column))->get_type() == 0 && (pl+((i/8+row)*8+i%8+column))->get_color() == piece.get_color()) {
-                            eval += (float) 0.1*(float)(piece.get_color() == 1?1:-1);
+                            eval += (float)(piece.get_color() == 1?1:-1) * 0.1;
                             break;
                         }
                     }
                 }
             }
         }
+        if ((double_pawns || open_lines) && to_play == 0 && piece.get_type() == 0) {
+            pawn_map[piece.get_color()][i%8]++;
+        }
+        if (open_lines && to_play == 0 && piece.get_type() == 3) {
+            rook_pos[piece.get_color()].push_back(i);
+        }
     }
-    cout << endl;
+    if (space_calculation && to_play == 0) {
+        int full_space = 0;
+        int square;
+        for (int sq = 0; sq < 32; sq++) {
+            square = space_map[sq];
+            full_space += square < 0 ? -1 : 0;
+        }
+        for (int sq = 32; sq < 64; sq++) {
+            square = space_map[sq];
+            full_space += square > 0 ? 1 : 0;
+        }
+        eval += (float) full_space * 0.2;
+    }
+    if (double_pawns && to_play == 0) {
+        for (int &i:pawn_map[0]) {eval -= (i>1?(float) i/10:0);}
+        for (int &i:pawn_map[1]) {eval += (i>1?(float) i/10:0);}
+    }
+    if (open_lines && to_play == 0) {
+        for (int &i:rook_pos[0]) {
+            if (pawn_map[0][i] == 0) {
+                eval -= 0.1;
+                if (pawn_map[1][i] == 0) {
+                    eval -= 0.1;
+                }
+            }
+        }
+        for (int &i:rook_pos[1]) {
+            if (pawn_map[1][i] == 0) {
+                eval += 0.1;
+                if (pawn_map[0][i] == 0) {
+                    eval += 0.1;
+                }
+            }
+        }
+    }
     return eval;
 }
 vector<tuple<int, int, int>> Bot_ui::order_moves(int color) {
