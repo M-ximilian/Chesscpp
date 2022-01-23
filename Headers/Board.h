@@ -54,14 +54,14 @@ public:
     Piece * get_pl();
     bool * get_pe();
     string get_fen();
-    int get_debug() {return move_count;};
+    int move_count = 0;
     const vector<Move> & get_ml() {return move_list;};
     *Board() {vector<Move>().swap(move_list);move_list = {};move_list.shrink_to_fit();move_list.clear(); en_passant = -1, mr_count = 0, to_play = 1;}
     void make_move(tuple<int, int, int> move);
 private:
     Interface *ui_white = new Interface{1, nullptr, new Random_ui(1)}, *ui_black = new Interface{1, nullptr, new Random_ui(0)};
     Piece piece_list[64] = {};
-    int king_positions[2] = {}, en_passant, mr_count, undo_count = 0, move_count = 0;
+    int king_positions[2] = {}, en_passant, mr_count, undo_count = 0;
     bool piece_exists[64] = {}, castles[4] = {false, false, false, false};
     vector<Move> move_list = {};
     vector<Position> positions = {};

@@ -80,8 +80,8 @@ void Board::draw(int player) {
         string to_print;
         to_print = (piece_exists[real_i] ? "  " : "\u25a1 ");
         if (piece_exists[real_i]) {
-            if (i % 8 == 7) { cout << fancy_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
-            else { cout << fancy_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
+            if (i % 8 == 7) { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << endl; }
+            else { cout << fancier_symbols[piece_list[real_i].get_color()*6+piece_list[real_i].get_type()] << " "; }
         } else {
             if (i % 8 == 7) { cout << "\u25a1 " << endl; }
 
