@@ -1,13 +1,13 @@
 #include "Headers/ui.h"
 #include "Headers/Board.h"
 bool postion_map = true;
-bool space_calculation = true;
+bool space_calculation = false;
 bool connected_pawns = true;
-bool open_lines = true;
+bool open_lines = false;
 bool double_pawns = true;
-bool endgame_close_king = true;
+bool endgame_close_king = false;
 bool single_pawns = true;
-bool open_bishops = true;
+bool open_bishops = false;
 
 
 

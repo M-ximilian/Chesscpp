@@ -96,12 +96,12 @@ int Board::run()  {
     while (true) {
         int game_end = update_moves();
         if (game_end >= 0) {
-            draw(1);
+            //draw(1);
             return game_end; //game over
         }
         while (true) {
             tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom default is -1
-            draw(1);
+            //draw(1);
             //cout << move_count << get_fen() << endl;
 
             if (to_play) {
