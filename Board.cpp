@@ -2,9 +2,11 @@
 
 
 //, const int * (ui_white)(), const int * (ui_black)()
-Board::Board(const string & startpos, Interface *white, Interface *black) {
+Board::Board(const string & startpos, Interface *white, Interface *black, bool draw) {
     int count = 0, spaces = -1;
-    delete ui_white, ui_black;
+    draw_board = draw;
+    delete ui_white;
+    delete ui_black;
     ui_white = white, ui_black = black;
     for (unsigned char value: startpos) {
         int real_count = 8*(7-count / 8)+count%8;
@@ -96,12 +98,12 @@ int Board::run()  {
     while (true) {
         int game_end = update_moves();
         if (game_end >= 0) {
-            //draw(1);
+            if (draw_board) {draw(1);}
             return game_end; //game over
         }
         while (true) {
             tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom default is -1
-            //draw(1);
+            if (draw_board) {draw(1);}
             //cout << move_count << get_fen() << endl;
 
             if (to_play) {

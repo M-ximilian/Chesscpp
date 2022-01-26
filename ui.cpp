@@ -1,13 +1,13 @@
 #include "Headers/ui.h"
 #include "Headers/Board.h"
 bool postion_map = true;
-bool space_calculation = false;
-bool connected_pawns = true;
-bool open_lines = false;
-bool double_pawns = true;
-bool endgame_close_king = false;
+bool space_calculation = true;
+bool connected_pawns = false;
+bool open_lines = true;
+bool double_pawns = false;
+bool endgame_close_king = true;
 bool single_pawns = true;
-bool open_bishops = false;
+bool open_bishops = true;
 
 
 
@@ -300,6 +300,9 @@ float Bot_ui::better_min_max(int local_depth, float alpha, float beta, bool capt
 }
 
 float Bot_ui::evaluate(Piece *pl, const bool *pe, const int &move_count) {
+    bool queens = false;
+    bool all[2] = {false, false};
+    int kings[2];
     float eval = 0;
     float material = 0;
     int space_map[64];
@@ -320,17 +323,17 @@ float Bot_ui::evaluate(Piece *pl, const bool *pe, const int &move_count) {
         if (!(*(pe+i))) {continue;}
         Piece &piece = *(pl+i);
         if (piece.get_type() == 5 && to_play == 0 && endgame_close_king) {
-            int other_king; // im Endgame wird der Abstand zum feindlichen Koenig mit einbezogen
-            for (int j = 0; j <64; j++) {
-                if (!(*(pe + j))) { continue; }
-                if ((pl+j)->get_type() == 5 && (pl+j)->get_color() != piece.get_color()) {other_king = j; break;}
-            }
-            eval += (eval_list[piece.get_type()] + 0.2*(8-max(abs(i/8 - other_king/8), abs(i%8-other_king%8)))) * (float) (-1+2*piece.get_color()) ;
-        }
-        else {
+            eval += eval_list[piece.get_type()] * (float) (-1+2*piece.get_color());
+            kings[piece.get_color()] = i;
+
+
+        } else {
             eval += eval_list[piece.get_type()] * (float) (-1+2*piece.get_color()) + 0.4*eval_positions[piece.get_color()*6+piece.get_type()][i];
         }
-
+        if (piece.get_type() != 5) {
+            all[piece.get_color()] = true;
+            if (piece.get_type() == 4) {queens = true;}
+        }
         if (space_calculation && to_play == 0) {
             int multiplier = piece.get_color()==1?1:-1;
             for (int move:piece.get_defend()) {
@@ -424,6 +427,18 @@ float Bot_ui::evaluate(Piece *pl, const bool *pe, const int &move_count) {
     if (open_bishops && to_play == 0) {
         for (int pawn = 0; pawn < 8; pawn++) {
             if (pawn_map[0][pawn] == 0 && pawn_map[1][pawn] == 0) {eval += 0.1*(bishopsnknights<0?max(-2,bishopsnknights):min(2, bishopsnknights));}
+        }
+    }
+    if (endgame_close_king && to_play == 0) {
+        if (queens) {eval += eval_positions[11][kings[1]]-eval_positions[5][kings[0]];}
+        else {
+            if (!all[0]) {
+                eval +=  (float) (7-max(abs(kings[0]/8 - kings[1]/8), abs(kings[0]%8-kings[1]%8)));
+                eval += (float) 0.5 * (float) (max(7- kings[0]/8,  kings[0]/8) + max(7- kings[0]%8,  kings[0]%8));
+            } if (!all[1]) {
+                eval -= (float) (7 - max(abs(kings[0] / 8 - kings[1] / 8), abs(kings[0] % 8 - kings[1] % 8)));
+                eval -= (float) 0.5 * (float) (max(7- kings[1]/8,  kings[1]/8) + max(7- kings[1]%8,  kings[1]%8));
+            }
         }
     }
     //cout << roundf(eval*100)/100 << endl;
