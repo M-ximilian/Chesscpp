@@ -58,7 +58,9 @@ public:
     const vector<Move> & get_ml() {return move_list;};
     *Board() {vector<Move>().swap(move_list);move_list = {};move_list.shrink_to_fit();move_list.clear(); en_passant = -1, mr_count = 0, to_play = 1;}
     void make_move(tuple<int, int, int> move);
+    string get_pgn();
 private:
+    vector<string> uci;
     bool draw_board;
     Interface *ui_white = new Interface{1, nullptr, new Random_ui(1)}, *ui_black = new Interface{1, nullptr, new Random_ui(0)};
     Piece piece_list[64] = {};

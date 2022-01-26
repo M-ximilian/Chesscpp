@@ -70,6 +70,7 @@ tuple<bool, int, int, int> Ascii_ui::move() {
         else if (raw_move == "to_last") {move = tuple(true, 4, 0, 0); return move;}
         else if (raw_move == "to start") {move = tuple(true, 5, 0, 0); return move;}
         else if (raw_move == "new game") {move = tuple(true, 6, 0, 0); return move;}
+        else if (raw_move == "pgn") {move = tuple(true, 7, 0, 0); return move;}
         else {
             int piece = convert_piece_type((raw_move.at(0))); // type of piece to move
             raw_piece = raw_move.at(0);

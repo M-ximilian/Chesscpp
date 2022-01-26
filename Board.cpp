@@ -77,6 +77,7 @@ Board::Board(const string & startpos, Interface *white, Interface *black, bool d
 
 }
 void Board::draw(int player) {
+    if (!uci.empty()) {cout << uci.at(uci.size()-1);}
     for (int i = 0; i < 64; i++) {
         int real_i = (player==1? 8*(7-i/8) + i%8: i/8*8 + 7-(i%8));
         string to_print;
@@ -116,6 +117,7 @@ int Board::run()  {
             if (get<0>(move_case)) {
                 if (get<1>(move_case) == 6) {return 6;} // new game requested
                 else if (get<1>(move_case) == 1) {undo();undo();}
+                else if (get<1>(move_case) == 7) {cout << get_pgn() << endl;}
                 else {continue;}
             } else {
                 cout << "move " << (char) (get<1>(move_case)%8 + 97) <<  (get<1>(move_case)/8 + 1) << " " << (char) (get<2>(move_case)%8 + 97) <<  (get<2>(move_case)/8 + 1) << " " << endl;
@@ -152,6 +154,7 @@ void Board::make_move(int old, int target, int promotion) {
         for (int i = 0; i< undo_count; i++) {
             move_list.pop_back();
             positions.pop_back();
+            uci.pop_back();
         }
         undo_count = 0;
     }
@@ -217,18 +220,6 @@ void Board::make_move(int old, int target, int promotion) {
         new_position.push_back(castle);
     }
     positions.push_back({new_position, en_passant});
-    /*for (int i = 0; i < 64; i++) {
-        new_position.position[i] = (piece_exists[i]? tuple<int, int>(piece_list[i].get_color(), piece_list[i].get_type()): tuple<int, int>(-1,-1));
-        if (i<4) {new_position.castles[i] = castles[i];}
-    }
-
-    new_position.en_passant = en_passant;
-
-    if (obj.get_type() == 0) {
-        mr_count = 0;
-        //positions.clear();
-    }*/
-    // draw rules and castles updates
     if (obj.get_type() == 5) {
         if (obj.get_color() == 1) {castles[0] = false; castles[1] = false;}
         else {castles[2] = false; castles[3] = false;}
@@ -251,9 +242,18 @@ void Board::make_move(int old, int target, int promotion) {
                 break;
         }
     }
+    string uci_move;
+    uci_move.push_back(convert_piece_type(0, piece_list[old].get_type()));
+    uci_move.push_back(char(old%8+97));
+    uci_move.push_back(char(old/8+49));
+    uci_move.push_back(char(target%8+97));
+    uci_move.push_back(char(target/8+49));
+    if (promotion != -1) {uci_move.push_back('='); uci_move.push_back(convert_piece_type(0,promotion));}
+
+    uci.push_back(uci_move);
+
     move_count ++;
     mr_count ++;
-    //positions.push_back(new_position);
 
     to_play = 1-to_play;
 }
@@ -697,5 +697,14 @@ string Board::get_fen() {
     output.append(to_string(move_count));
 
     return output;
+}
+
+string Board::get_pgn() {
+    string all;
+    for (int i = 0; i < uci.size()-undo_count; i++) {
+        if (i%2 == 0) {all += " " + to_string(i/2+1) + ".";}
+        all += " " + uci.at(i);
+    }
+    return all;
 }
 
