@@ -10,7 +10,6 @@ public:
     [[nodiscard]] int get_color() const; // getter Funktionen
     [[nodiscard]] int get_type() const;
 
-
     bool pos_in_legal_moves(const short int &); // prueft Anwesenheit eines Feldes in der jeweiligen Liste der Figur
     bool pos_in_real_moves(const short int &);
     bool pos_in_pins(const short int &);
@@ -23,7 +22,6 @@ public:
     const vector<int> & get_pins();
     const vector<int> & get_defend();
     const vector<int> & get_update();
-
 
     void set_legal_moves(const vector<int>&); // setter Funktionen
     void set_pins(const vector<int>&);
@@ -44,9 +42,6 @@ private:
     // legal defend wie legal_moves + erste eigene Figur jeder Sichtlinie, fuer Bauern nur Diagonalzuege
     // update wie legal defend, für Bauern aber alle Zuege
     vector<int> legal_moves = {}, real_moves = {}, pins = {}, view[8] = {}, legal_defend = {}, update = {};
-
-
-
 };
 struct Move {
     int type{}; //normaler Zug, Schlag, En Passant, Rochade, Entwicklung, Schlag + Entwicklung (0-5)

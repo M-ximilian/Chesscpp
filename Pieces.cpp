@@ -11,55 +11,12 @@ Piece::Piece() {
     type = (short) 7;
 }
 
-
 int Piece::get_color() const {return color;}
 int Piece::get_type() const {return type;}
 
-/*void Piece::test_set_view(vector<int> * test) {
-    for (short int i = 0; i < 8; i++) {
-        view[i] = test[i];
-        for (auto & j:view[i]) {
-            cout << j << " ";
-        }
-        cout << endl;
-    }
-}*/
-
 tuple<bool, vector<int> &> Piece::pos_in_view(const int &piece, const int &pos) {
-    int search_line = 0, current_line = piece/8, current_row = piece%8, row = pos%8, line = pos/8, begin = 0, end = 0;
-    /*if (type != 0) {
-        if (line < current_line) {
-            if (row < current_row) {
-                search_line = 0;
-            } else if (row > current_row) {
-                search_line = 2;
-            } else {
-                search_line = 1;
-            }
-        }
-        else if (line > current_line) {
-            if (row < current_row) {
-                search_line = 5;
-            } else if (row > current_row) {
-                search_line = 7;
-            } else {
-                search_line = 6;
-            }
-        }
-        else{
-            if (row < current_row) {
-                search_line = 3;
-            } else if (row > current_row) {
-                search_line = 4;
-            }
-        }
-    } else{
-        if (row == current_row) {search_line = 5;}
-        else if (row < current_row) {search_line = 6;}
-        else {search_line = 7;}
-        if (color == 1) {search_line -= 5;}
-    }
-    return {find(view[search_line].begin(), view[search_line].end(), pos) != view[search_line].end(), view[search_line]};*/
+    int begin = 0, end = 0;
+
     if (pos < piece || type == 0) {begin = 0, end = 4;}
     else {begin = 4, end = 8;}
     for (int i = begin; i < end; i++) {
@@ -69,15 +26,12 @@ tuple<bool, vector<int> &> Piece::pos_in_view(const int &piece, const int &pos) 
         }
     }
     return {false, view[0]};
-
-
 }
 const vector<int> & Piece::get_legal_moves() {return legal_moves;}; // get-methods
 const vector<int> & Piece::get_real_moves() {return real_moves;};
 const vector<int> & Piece::get_pins() {return pins;};
 const vector<int> & Piece::get_defend() {return legal_defend;};
 const vector<int> & Piece::get_update() {return update;};
-
 
 bool Piece::pos_in_legal_moves(const short int & pos) {
     vector<int>::iterator in;
@@ -124,8 +78,6 @@ bool Piece::pos_in_update(const short int & pos) {
         return false;
     }
 }
-
-
 void Piece::set_legal_moves(const vector<int>& moves) {legal_moves = moves;}
 void Piece::set_pins(const vector<int>& moves) {pins = moves;}
 void Piece::set_defend(const vector<int>& moves) {legal_defend = moves;}

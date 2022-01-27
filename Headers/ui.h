@@ -66,10 +66,8 @@ static const float eval_positions[12][64] = {{0, 0, 0, 0, 0, 0, 0, 0, -5, -5, -5
                                               -3, -4, -4, -5, -5, -4, -4, -3,
                                               -3, -4, -4, -5, -5, -4, -4, -3}}; // K
 
-
 // Definition der Klasse Board, um deren Funtionen im Anschluss uebergeben zu koennen
 class Board;
-
 // Allgemeine Definition eines Interfaces
 class Ui {
 public:
@@ -88,28 +86,19 @@ public:
             str.replace(start_pos, from.length(), to);
         }
     }
-
-
 };
-
 // Ascii Ui: einfaches Interface, um Zuege zu uebergeben
 class Ascii_ui : public Ui {
-
-
 public:
     explicit Ascii_ui(int color) : Ui(color) {} // Konstrukton
     tuple<bool, int, int, int> move(); // Zugfunktion
 };
-
-
 // Ui, die zufaellige Zuege macht
 class Random_ui : public Ui {
 public:
     explicit Random_ui(int color) : Ui(color) {}; // Konstruktor
     tuple<bool, int, int, int> move(); // Zug Funktion
 };
-
-
 // Ui fuer Minmax Algorithmus
 class Bot_ui: public Ui {
 public:
@@ -120,14 +109,10 @@ private:
     Board *game{};
     int depth;
     vector<tuple<int, int, int>> best_moves_this_iteration;
-    tuple<float, int, int, int> min_max(int local_depth, double alpha, double beta, tuple<int,int, int> last_move);
     float evaluate(Piece *, const bool *, const int &move_count);
     vector<tuple<int, int, int>> order_moves(int color);
-    float better_min_max(int local_depth, float alpha, float beta, bool capture_sort = false, bool pre_sort = false, int end_depth = 0);
+    float min_max(int local_depth, float alpha, float beta, bool capture_sort = false, int end_depth = 0);
     vector<float> pre_scores;
-    vector<tuple<int, int, int>> better_order_moves(int color);
-    vector<tuple<int, int, int>> unordered_moves(int color);
     vector<tuple<int, int, int>> capture_order(int color);
 };
 #endif
-

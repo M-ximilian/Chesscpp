@@ -42,7 +42,7 @@ int main() {
         if (ui_black->type == 2) {ui_black->bui->set_board(&b);}
         int test = b.run();
         scores[test==6?5:test]++;
-        ofstream Output("D:/Programing/CLion/Chess/scores4.txt");
+        ofstream Output("C:/Users/janne/OneDrive/Desktop/Chesscpp-main/scores4.txt");
         Output << scores[0] << " " << scores[1] << " " << scores[2] << " " << scores[3] << " " << scores[4] << " "<<scores[5];
         Output.close();
         if (i % 50 == 0) {
@@ -50,8 +50,6 @@ int main() {
         }
     }
         //cout << i << endl;
-
-
     return 0;
 }
 
