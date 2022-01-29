@@ -15,11 +15,11 @@ Der Wahrheitswert in der Initialisierung von Board (ebenfalls main.cpp) gibt an,
 ### Makefile
 ```
 cmake_minimum_required(VERSION 3.21)
-project(***Chesscpp-main***)
+project(Chesscpp-main)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(***Chesscpp-main*** Pieces.cpp Board.cpp Headers/Board.h Headers/Pieces.h main.cpp Headers/main.h ui.cpp Headers/ui.h)
+add_executable(Chesscpp-main Pieces.cpp Board.cpp Headers/Board.h Headers/Pieces.h main.cpp Headers/main.h ui.cpp Headers/ui.h)
 ```
 
-Markierter Text muss mit dem aktuellen Names des Ordners abgeglichen und falls notwendig, ersetzt werden.
+Ordnername muss, falls notwendig, angepasst werden. Der Ordner sollte immer ***Chesscpp-main*** heißen.
