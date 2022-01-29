@@ -8,7 +8,7 @@ int main() {
     int scores[6] = {0,0,0,0,0,0};
     srand(used_seed);
     cout << used_seed << endl;
-    string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+    string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"; //Startpositon in FEN-Notation
 
     for (int i = 0; i<100000; i++) {
         auto *ui_white = new Interface{0, new Ascii_ui(1), new Random_ui(1), new Bot_ui(1, bot_depth)},
