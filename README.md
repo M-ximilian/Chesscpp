@@ -1,12 +1,12 @@
-#Implementierung eines Schachprogramms
+# Implementierung eines Schachprogramms
 ****
-##Anleitung
+## Anleitung
 ****
-###Wichtig
+### Wichtig
 Das Programm enthält weder einen Compiler noch eine ausführbare Datei. 
 Alle eigenen Versuche müssen mit eigener Software durchgeführt werden.
 
-###Wie funktioniert das Programm?
+### Wie funktioniert das Programm?
 Bei Simulationen wird eine Ausgabedatei kreiert. 
 Diese enthält 6 Werte. 
 Gelesen von links nach rechts handelt es sich um Siege von Schwarz, Siege von Weiß, Patt, Stellungswiederholung, 50-Zug-Regel und Spielende durch Materialmangel. 
