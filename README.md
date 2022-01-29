@@ -2,7 +2,7 @@
 ## Anleitung
 ### Wichtig
 Das Programm enthält weder einen Compiler noch eine ausführbare Datei. 
-Alle eigenen Versuche müssen mit eigener Software durchgeführt werden.
+Alle Versuche müssen mit eigener Software durchgeführt werden.
 
 ### Wie funktioniert das Programm?
 Bei Simulationen wird eine Ausgabedatei kreiert. 
