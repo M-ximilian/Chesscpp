@@ -108,7 +108,6 @@ int Board::run()  {
         while (true) {
             tuple<bool, int, int, int> move_case; // bool true is system command in first int else move as [pos, tar, prom], prom default is -1
             if (draw_board) {draw(1);}
-            //cout << move_count << get_fen() << endl;
 
             // call player to move
             if (to_play) {
