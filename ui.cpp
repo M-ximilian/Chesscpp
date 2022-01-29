@@ -143,9 +143,6 @@ tuple<bool, int, int, int> Bot_ui::move() {
     score = min_max(depth, -10000000, 10000000);
     // select best_move from 3 best moves returned by minmax
     best_move = best_moves_this_iteration.size()==1?best_moves_this_iteration.at(0):best_moves_this_iteration[rand()%(best_moves_this_iteration.size()-1)];
-    //cout << count_moves << endl;
-    //cout << game->get_fen()  << endl;
-    //cout << get<0>(best_move) << " " << get<1>(best_move) << " " << get<2>(best_move) << " "<< score << endl;
     cout << "eval " << score/10 << endl;
     return {false, get<0>(best_move), get<1>(best_move), get<2>(best_move)};
 }
@@ -156,12 +153,6 @@ float Bot_ui::min_max(int local_depth, float alpha, float beta, bool capture_sor
     if (local_depth == 0) {return evaluate(game->get_pl(), game->get_pe(), game->move_count);}
     // generate moves | movelist to iterate over
     vector<tuple<int, int, int>> moves;
-    if (local_depth == 0 && !capture_sort) {
-        moves = capture_order(game->to_play);
-        capture_sort = true;
-        if (moves.empty()) {return evaluate(game->get_pl(), game->get_pe(), game->move_count);}
-        else {local_depth = 1;}
-    }
     else {moves = order_moves(game->to_play);}
 
     // start search
@@ -196,13 +187,10 @@ float Bot_ui::min_max(int local_depth, float alpha, float beta, bool capture_sor
         // recursion
         float eval = min_max(local_depth-1, alpha, beta, capture_sort);
         if (depth == local_depth) {
-            // cout << get<0>(move) << " " << get<1>(move) << " " << eval << endl;
         }
         if (local_depth == 3) {
             bool test = false;
         }
-        // cout << "2nd eval " << eval << endl;
-
         // undo move to check new lines
         game->undo();
         game->update_moves();
@@ -374,7 +362,6 @@ float Bot_ui::evaluate(Piece *pl, const bool *pe, const int &move_count) {
             }
         }
     }
-    // cout << roundf(eval*100)/100 << endl;
     return roundf(eval*100)/100;
 }
 
