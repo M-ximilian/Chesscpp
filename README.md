@@ -1,7 +1,5 @@
 # Implementierung eines Schachprogramms
-****
 ## Anleitung
-****
 ### Wichtig
 Das Programm enthält weder einen Compiler noch eine ausführbare Datei. 
 Alle eigenen Versuche müssen mit eigener Software durchgeführt werden.
