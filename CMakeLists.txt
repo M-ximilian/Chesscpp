@@ -3,4 +3,4 @@ project(Chesscpp-main)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(Chesscpp-main Pieces.cpp Board.cpp Headers/Board.h Headers/Pieces.h main.cpp Headers/main.h ui.cpp Headers/ui.h)
+add_executable(Chesscpp-main main.cpp Board.cpp ui.cpp Pieces.cpp Headers/main.h Headers/Board.h Headers/ui.h Headers/Pieces.h)
