@@ -12,4 +12,14 @@ Für Simulationen mit verschiedenen Oberflächen ist je der erste Wert in der In
 0 steht für einen menschlichen Spieler (bedienbare Ui), 1 für zufällige Züge und 2 für einen Minmax-Bot. 
 Der Wahrheitswert in der Initialisierung von Board (ebenfalls main.cpp) gibt an, ob das Brett nach jedem Zug gezeichnet werden soll.
 
+### Makefile
+```
+cmake_minimum_required(VERSION 3.21)
+project(***Chesscpp-main***)
 
+set(CMAKE_CXX_STANDARD 17)
+
+add_executable(***Chesscpp-main*** Pieces.cpp Board.cpp Headers/Board.h Headers/Pieces.h main.cpp Headers/main.h ui.cpp Headers/ui.h)
+```
+
+Markierter Text muss mit dem aktuellen Names des Ordners abgeglichen und falls notwendig, ersetzt werden.
