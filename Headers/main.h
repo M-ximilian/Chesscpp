@@ -1,6 +1,5 @@
 #ifndef MAIN
 #define MAIN
-#include <direct.h>
 #include <iostream>
 #include <algorithm>
 #include <utility>
