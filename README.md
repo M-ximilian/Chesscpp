@@ -3,7 +3,7 @@
 ### Wichtig
 Das Programm enthält weder einen Compiler noch eine ausführbare Datei. 
 Alle Versuche müssen mit eigener Software durchgeführt werden.
-Getestet wurde erfolgreich mit MSVS 2019/2022 sowie Cygwin und g++.
+Getestet wurde erfolgreich mit Visual Studio 2019/2022 sowie Cygwin und g++.
 
 ### Wie funktioniert das Programm?
 Bei Simulationen wird eine Ausgabedatei kreiert. 
