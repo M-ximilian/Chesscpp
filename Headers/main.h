@@ -13,7 +13,7 @@
 #include <variant>
 #include <fstream>
 using namespace std;
-// benoetigte Libaries
+// benötigte Libaries
 #endif
 
 
